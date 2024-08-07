@@ -8,7 +8,7 @@
 //function to get an return latitue and longitue of city
 async function handleCoordinates(city) {
   let latlon = [];
-  const apiKey = "59d674a8299ce106ece15287cf479fbc";
+  const apiKey = "";
   //URL needed for API request
   const coordinateUrl =
     "http://api.openweathermap.org/geo/1.0/direct?q=" +
@@ -36,7 +36,7 @@ async function handleCoordinates(city) {
 
 //fuction to get and return 5 day forecast for city using latitude and longitude from above
 async function handleForecast(lat, lon) {
-  const apiKey = "59d674a8299ce106ece15287cf479fbc";
+  const apiKey = "";
 
   let forcastUrl =
     "http://api.openweathermap.org/data/2.5/forecast?lat=" +
@@ -50,35 +50,32 @@ async function handleForecast(lat, lon) {
   //variable to hold response from forecast API call
   let foreCast;
   await fetch(forcastUrl)
+    //gets response from fetch call
     .then(function (response) {
+      //makes fetch into JSON
       return response.json();
     })
+    //recieves response as JSON
     .then(function (data) {
+      //sets local variable to response JSON
       foreCast = data;
     });
   //returns forcast JSON
   return foreCast;
 }
 
+//
 async function handleCitySearch(event) {
   event.preventDefault();
 
   const city = $("#inputCity").val();
-  console.log(city);
 
-  //make API call to get forcast using lat and long
   let coordinates = await handleCoordinates(city);
   const latitude = coordinates[0];
   const longitude = coordinates[1];
+  //passes latitdue and longitude to get forecast data
   let forecast = await handleForecast(latitude, longitude);
   console.log(forecast);
-
-  //get information for single day forcast
-
-  //create card with single day forcast information
-  //get information for 5 day forcast
-  //create cards for 5 day forcast
-  //append cards to index.html
 }
 
 $(document).ready(function () {
