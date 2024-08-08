@@ -59,6 +59,7 @@ async function handleForecast(lat, lon) {
 
 async function handleCitySearch(event) {
   event.preventDefault();
+  $(".forecast-card").empty();
 
   const city = $("#inputCity").val();
 
@@ -68,6 +69,9 @@ async function handleCitySearch(event) {
   //passes latitdue and longitude to get forecast data
   let forecast = await handleForecast(latitude, longitude);
 
+  console.log(forecast);
+  console.log("1723140000");
+  console.log(dayjs("1723140000").format("MM/DD/YYYY"));
   createForecastCard(forecast);
 }
 
@@ -93,25 +97,26 @@ function createForecastCard(forecastData) {
   // creates paragraph element in card, adds class for card temperature, creates text for temperature
   const cardTemperature = $("<p>");
   cardTemperature.addClass("card-temperature");
-  cardTemperature.text(forecastData.list[0].main.temp);
+  cardTemperature.text(
+    "Temperature: " + Math.round(forecastData.list[0].main.temp) + "\u00B0"
+  );
   //math.round() Math.floor(number here); <- this rounds it DOWN so 4.6 becomes 4
   // math.round(number here); <- this rounds it UP so 4.6 becomes 5
 
   // creates paragraph element in card, adds class for card emoji, creates text for emoji
-  const cardEmoji = $("<p>");
+  const cardEmoji = $("<h2>");
   cardEmoji.addClass("card-emoji");
-  //ADD CONDITIONAL STATEMENT FOR EMOJI --- IS THIS NEEDED???
-  cardEmoji.text(forecastData.list[0].weather[0].description);
+  cardEmoji.text(weatherEmoji(forecastData.list[0].weather[0].icon));
 
   // creates paragraph element in card, adds class for card wind, creates text for wind
   const cardWind = $("<p>");
   cardWind.addClass("card-wind");
-  cardWind.text(forecastData.list[0].wind.speed);
+  cardWind.text("Wind Speed: " + forecastData.list[0].wind.speed + " mph");
 
   // creates paragraph element in card, adds class for card humidity, creates text for humidity
   const cardHumidity = $("<p>");
   cardHumidity.addClass("card-humidity");
-  cardHumidity.text(forecastData.list[0].main.humidity);
+  cardHumidity.text("Humidity: " + forecastData.list[0].main.humidity + "%");
 
   // appends card title, card text, card deadline, card delete button, and card body
   cardBody.append(cardCity);
@@ -126,34 +131,39 @@ function createForecastCard(forecastData) {
 }
 
 function weatherEmoji(weatherIcon) {
+  let emojiString = "";
   switch (weatherIcon) {
-    case "clear sky":
-      "☀️";
+    case "01d":
+      emojiString = "☀️";
       break;
-    case "few clouds":
-      "⛅";
+    case "02d":
+      emojiString = "⛅";
       break;
-    case "scattered clouds":
-      "☁️";
+    case "03d":
+      emojiString = "☁️";
       break;
-    case "broken clouds":
-      "🌤️";
+    case "04d":
+      emojiString = "🌤️";
       break;
-    case "shower rain":
-      "☔";
+    case "09d":
+      emojiString = "☔";
       break;
-    case "rain":
-      "🌧️";
+    case "10d":
+      emojiString = "🌧️";
       break;
-    case "thunderstorm":
-      "⛈️";
+    case "11d":
+      emojiString = "⛈️";
       break;
-    case "snow":
-      "❄️";
+    case "13d":
+      emojiString = "❄️";
       break;
-    case "mist":
-      "🌫️";
+    case "50d":
+      emojiString = "🌫️";
+      break;
+    default:
+      emojiString = "🌘";
   }
+  return emojiString;
 }
 
 // TODO function to create five day forecast cards
