@@ -101,7 +101,7 @@ function createForecastCard(forecastData) {
   const cardEmoji = $("<p>");
   cardEmoji.addClass("card-emoji");
   //ADD CONDITIONAL STATEMENT FOR EMOJI --- IS THIS NEEDED???
-  cardEmoji.text(forecastData.list[0].weather[0].icon);
+  cardEmoji.text(forecastData.list[0].weather[0].description);
 
   // creates paragraph element in card, adds class for card wind, creates text for wind
   const cardWind = $("<p>");
@@ -125,33 +125,36 @@ function createForecastCard(forecastData) {
   //   return cardBody;
 }
 
-// function weatherEmoji(weatherIcon) {
-//   switch (weatherIcon) {
-//     case "clear sky":
-//       "☀️";
-//       break;
-//     case "few clouds":
-//       "⛅";
-//       break;
-//     case "few clouds":
-//       "⛅";
-//       break;
-//     case "few clouds":
-//       "⛅";
-//       break;
-//     case "few clouds":
-//       "⛅";
-//       break;
-//     case "few clouds":
-//       "⛅";
-//       break;
-//     case "few clouds":
-//       "⛅";
-//       break;
-//     default:
-//     // code block
-//   }
-// }
+function weatherEmoji(weatherIcon) {
+  switch (weatherIcon) {
+    case "clear sky":
+      "☀️";
+      break;
+    case "few clouds":
+      "⛅";
+      break;
+    case "scattered clouds":
+      "☁️";
+      break;
+    case "broken clouds":
+      "🌤️";
+      break;
+    case "shower rain":
+      "☔";
+      break;
+    case "rain":
+      "🌧️";
+      break;
+    case "thunderstorm":
+      "⛈️";
+      break;
+    case "snow":
+      "❄️";
+      break;
+    case "mist":
+      "🌫️";
+  }
+}
 
 // TODO function to create five day forecast cards
 
