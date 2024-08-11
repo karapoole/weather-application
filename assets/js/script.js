@@ -29,7 +29,7 @@ async function handleCoordinates(city) {
 
 //fuction to get and return 5 day forecast for city using latitude and longitude from above
 async function handleForecast(lat, lon) {
-  const apiKey = "59d674a8299ce106ece15287cf479fbc";
+  const apiKey = "";
 
   let forcastUrl =
     "http://api.openweathermap.org/data/2.5/forecast?lat=" +
