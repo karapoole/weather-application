@@ -1,7 +1,7 @@
 //function to get an return latitue and longitue of city
 async function handleCoordinates(city) {
   let latlon = [];
-  const apiKey = "59d674a8299ce106ece15287cf479fbc";
+  const apiKey = "";
   //URL needed for API request
   const coordinateUrl =
     "http://api.openweathermap.org/geo/1.0/direct?q=" +
@@ -59,7 +59,7 @@ async function handleForecast(lat, lon) {
 
 async function handleCitySearch(event) {
   event.preventDefault();
-  $(".forecast-card").empty();
+  clearForecastDetails();
 
   const city = $("#inputCity").val();
 
@@ -69,16 +69,50 @@ async function handleCitySearch(event) {
   //passes latitdue and longitude to get forecast data
   let forecast = await handleForecast(latitude, longitude);
 
-  console.log(forecast);
-  console.log("1723140000");
-  console.log(dayjs("1723140000").format("MM/DD/YYYY"));
-  createForecastCard(forecast);
+  // console.log(forecast);
+  loadForecastCards(forecast);
 }
 
-// TODO function to create current forecast card
-function createForecastCard(forecastData) {
-  const cardBody = $("<div>");
+// function to load forecast results from search history buttons
+function handleSearchHistory() {}
+
+// function to clear the contents of current and five day forecast
+function clearForecastDetails() {
+  $(".forecast-card").empty();
+  $(".five-day").empty();
+}
+// Function to create Current Forecard card
+function loadForecastCards(forecastData) {
+  const currentForecastDetails = {
+    city: forecastData.city.name,
+    icon: weatherEmoji(forecastData.list[0].weather[0].icon),
+    date: forecastData.list[0].dt_txt,
+    temperature: Math.round(forecastData.list[0].main.temp),
+    wind: forecastData.list[0].wind.speed,
+    humidity: forecastData.list[0].main.humidity,
+  };
+  loadCurrentForecastCard(currentForecastDetails);
+  // fiveDayForecastList = [];
+  for (let i = 7; i < forecastData.list.length; i += 8) {
+    const fiveDayForecastDetail = {
+      icon: weatherEmoji(forecastData.list[i].weather[0].icon),
+      date: forecastData.list[i].dt_txt,
+      temperature: Math.round(forecastData.list[i].main.temp),
+      wind: forecastData.list[i].wind.speed,
+      humidity: forecastData.list[i].main.humidity,
+    };
+    loadFiveDayForecastCard(fiveDayForecastDetail);
+  }
+  // console.log(fiveDayForecastList);
+  const historyBtn = $("<button>");
+  historyBtn.text(forecastData.city.name);
+  // add data-* attribute for city name
+  $(".history-btns").append(historyBtn);
+}
+
+function loadCurrentForecastCard(currectForecastDetails) {
   //creates box around forecast card
+  const cardBody = $("<div>");
   cardBody.css("border", "3px solid black");
   cardBody.css("border-width", "5px");
   cardBody.css("marginTop", "10px");
@@ -87,47 +121,95 @@ function createForecastCard(forecastData) {
   // creates paragraph element in card, adds class for card city, creates text for city
   const cardCity = $("<h3>");
   cardCity.addClass("card-city");
-  cardCity.text(forecastData.city.name);
+  cardCity.text(
+    currectForecastDetails.city + " " + currectForecastDetails.icon
+  );
 
   // creates paragraph element in card, adds class for card date, creates text for date
   const cardDate = $("<h5>");
   cardDate.addClass("card-date");
-  cardDate.text(forecastData.list[0].dt_txt);
+  let date = currectForecastDetails.date.split(" ");
+  cardDate.text(dayjs(date[0]).format("MM/DD/YYYY"));
 
   // creates paragraph element in card, adds class for card temperature, creates text for temperature
   const cardTemperature = $("<p>");
   cardTemperature.addClass("card-temperature");
   cardTemperature.text(
-    "Temperature: " + Math.round(forecastData.list[0].main.temp) + "\u00B0"
+    "Temperature: " + currectForecastDetails.temperature + "\u00B0"
   );
-  //math.round() Math.floor(number here); <- this rounds it DOWN so 4.6 becomes 4
-  // math.round(number here); <- this rounds it UP so 4.6 becomes 5
 
   // creates paragraph element in card, adds class for card emoji, creates text for emoji
   const cardEmoji = $("<h2>");
   cardEmoji.addClass("card-emoji");
-  cardEmoji.text(weatherEmoji(forecastData.list[0].weather[0].icon));
+  cardEmoji.text();
 
   // creates paragraph element in card, adds class for card wind, creates text for wind
   const cardWind = $("<p>");
   cardWind.addClass("card-wind");
-  cardWind.text("Wind Speed: " + forecastData.list[0].wind.speed + " mph");
+  cardWind.text("Wind Speed: " + currectForecastDetails.wind + " mph");
 
   // creates paragraph element in card, adds class for card humidity, creates text for humidity
   const cardHumidity = $("<p>");
   cardHumidity.addClass("card-humidity");
-  cardHumidity.text("Humidity: " + forecastData.list[0].main.humidity + "%");
+  cardHumidity.text("Humidity: " + currectForecastDetails.humidity + "%");
 
   // appends card title, card text, card deadline, card delete button, and card body
   cardBody.append(cardCity);
   cardBody.append(cardDate);
-  cardBody.append(cardTemperature);
   cardBody.append(cardEmoji);
+  cardBody.append(cardTemperature);
   cardBody.append(cardWind);
   cardBody.append(cardHumidity);
   $(".forecast-card").append(cardBody);
+}
 
-  //   return cardBody;
+// TODO function to create current forecast card
+function loadFiveDayForecastCard(fiveDayForecastDetail) {
+  const cardBody = $("<div>");
+  //creates box around forecast card
+  cardBody.css("border", "3px solid black");
+  cardBody.css("background-color", "navy");
+  cardBody.css("color", "white");
+
+  cardBody.css("border-width", "5px");
+  cardBody.css("marginTop", "10px");
+  cardBody.css("padding", "30px");
+
+  // creates paragraph element in card, adds class for card date, creates text for date
+  const cardDate = $("<h5>");
+  cardDate.addClass("card-date");
+  let date = fiveDayForecastDetail.date.split(" ");
+  cardDate.text(dayjs(date[0]).format("MM/DD/YYYY"));
+
+  // creates paragraph element in card, adds class for card emoji, creates text for emoji
+  const cardEmoji = $("<h2>");
+  cardEmoji.addClass("card-emoji");
+  cardEmoji.text(fiveDayForecastDetail.icon);
+
+  // creates paragraph element in card, adds class for card temperature, creates text for temperature
+  const cardTemperature = $("<p>");
+  cardTemperature.addClass("card-temperature");
+  cardTemperature.text(
+    "Temperature: " + fiveDayForecastDetail.temperature + "\u00B0"
+  );
+
+  // creates paragraph element in card, adds class for card wind, creates text for wind
+  const cardWind = $("<p>");
+  cardWind.addClass("card-wind");
+  cardWind.text("Wind Speed: " + fiveDayForecastDetail.wind + " mph");
+
+  // creates paragraph element in card, adds class for card humidity, creates text for humidity
+  const cardHumidity = $("<p>");
+  cardHumidity.addClass("card-humidity");
+  cardHumidity.text("Humidity: " + fiveDayForecastDetail.humidity + "%");
+
+  // appends card title, card text, card deadline, card delete button, and card body
+  cardBody.append(cardDate);
+  cardBody.append(cardEmoji);
+  cardBody.append(cardTemperature);
+  cardBody.append(cardWind);
+  cardBody.append(cardHumidity);
+  $(".five-day").append(cardBody);
 }
 
 function weatherEmoji(weatherIcon) {
