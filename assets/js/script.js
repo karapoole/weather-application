@@ -1,7 +1,15 @@
+// Setting up local storage
+let currentForecastStorage =
+  JSON.parse(localStorage.getItem("currentForecast")) || "";
+let fiveDayForecastStorage =
+  JSON.parse(localStorage.getItem("fiveDayForecast")) || [];
+let searchHistoryStorage =
+  JSON.parse(localStorage.getItem("searchHistory")) || [];
+
 //function to get an return latitue and longitue of city
 async function handleCoordinates(city) {
   let latlon = [];
-  const apiKey = "";
+  const apiKey = "59d674a8299ce106ece15287cf479fbc";
   //URL needed for API request
   const coordinateUrl =
     "http://api.openweathermap.org/geo/1.0/direct?q=" +
@@ -29,7 +37,7 @@ async function handleCoordinates(city) {
 
 //fuction to get and return 5 day forecast for city using latitude and longitude from above
 async function handleForecast(lat, lon) {
-  const apiKey = "";
+  const apiKey = "59d674a8299ce106ece15287cf479fbc";
 
   let forcastUrl =
     "http://api.openweathermap.org/data/2.5/forecast?lat=" +
@@ -59,7 +67,6 @@ async function handleForecast(lat, lon) {
 
 async function handleCitySearch(event) {
   event.preventDefault();
-  clearForecastDetails();
 
   const city = $("#inputCity").val();
 
@@ -68,194 +75,213 @@ async function handleCitySearch(event) {
   const longitude = coordinates[1];
   //passes latitdue and longitude to get forecast data
   let forecast = await handleForecast(latitude, longitude);
+  handleForecardCards(forecast);
 
-  // console.log(forecast);
-  loadForecastCards(forecast);
-}
-
-// function to load forecast results from search history buttons
-function handleSearchHistory() {}
-
-// function to clear the contents of current and five day forecast
-function clearForecastDetails() {
-  $(".forecast-card").empty();
-  $(".five-day").empty();
-}
-// Function to create Current Forecard card
-function loadForecastCards(forecastData) {
-  const currentForecastDetails = {
-    city: forecastData.city.name,
-    icon: weatherEmoji(forecastData.list[0].weather[0].icon),
-    date: forecastData.list[0].dt_txt,
-    temperature: Math.round(forecastData.list[0].main.temp),
-    wind: forecastData.list[0].wind.speed,
-    humidity: forecastData.list[0].main.humidity,
+  const searchHistoryBtn = {
+    city: forecast.city.name,
+    lat: latitude,
+    lon: longitude,
   };
-  loadCurrentForecastCard(currentForecastDetails);
-  // fiveDayForecastList = [];
-  for (let i = 7; i < forecastData.list.length; i += 8) {
-    const fiveDayForecastDetail = {
-      icon: weatherEmoji(forecastData.list[i].weather[0].icon),
-      date: forecastData.list[i].dt_txt,
-      temperature: Math.round(forecastData.list[i].main.temp),
-      wind: forecastData.list[i].wind.speed,
-      humidity: forecastData.list[i].main.humidity,
-    };
-    loadFiveDayForecastCard(fiveDayForecastDetail);
-  }
-  // console.log(fiveDayForecastList);
-  const historyBtn = $("<button>");
-  historyBtn.text(forecastData.city.name);
-  // add data-* attribute for city name
-  $(".history-btns").append(historyBtn);
+
+  searchHistoryStorage.push(searchHistoryBtn);
+  localStorage.setItem("searchHistory", JSON.stringify(searchHistoryStorage));
+  loadSearchHistoryButtons();
+  $("#inputCity").val("");
 }
 
-function loadCurrentForecastCard(currectForecastDetails) {
-  //creates box around forecast card
-  const cardBody = $("<div>");
-  cardBody.css("border", "3px solid black");
-  cardBody.css("border-width", "5px");
-  cardBody.css("marginTop", "10px");
-  cardBody.css("padding", "30px");
+async function handleSearchHistoryCitySearch(event) {
+  event.preventDefault();
 
-  // creates paragraph element in card, adds class for card city, creates text for city
-  const cardCity = $("<h3>");
-  cardCity.addClass("card-city");
-  cardCity.text(
-    currectForecastDetails.city + " " + currectForecastDetails.icon
+  const searchHistoryBtn = $(event.currentTarget);
+  const latitude = searchHistoryBtn.data("latitude");
+  const longitude = searchHistoryBtn.data("longitude");
+
+  let forecast = await handleForecast(latitude, longitude);
+  handleForecardCards(forecast);
+}
+
+function handleForecardCards(forecast) {
+  const currentForecastDetails = {
+    city: forecast.city.name,
+    icon: forecast.list[0].weather[0].icon,
+    date: forecast.list[0].dt_txt,
+    temperature: Math.round(forecast.list[0].main.temp),
+    wind: forecast.list[0].wind.speed,
+    humidity: forecast.list[0].main.humidity,
+  };
+
+  currentForecastStorage = currentForecastDetails;
+  // Set current forecast information into local storage
+  localStorage.setItem(
+    "currentForecast",
+    JSON.stringify(currentForecastStorage)
   );
 
-  // creates paragraph element in card, adds class for card date, creates text for date
-  const cardDate = $("<h5>");
-  cardDate.addClass("card-date");
-  let date = currectForecastDetails.date.split(" ");
-  cardDate.text(dayjs(date[0]).format("MM/DD/YYYY"));
+  loadCurrentForecastCard();
 
-  // creates paragraph element in card, adds class for card temperature, creates text for temperature
-  const cardTemperature = $("<p>");
-  cardTemperature.addClass("card-temperature");
-  cardTemperature.text(
-    "Temperature: " + currectForecastDetails.temperature + "\u00B0"
+  // Loading five day forecast information to localStorage
+  fiveDayForecastStorage = [];
+
+  for (let i = 7; i < forecast.list.length; i += 8) {
+    const fiveDayForecastDetail = {
+      icon: forecast.list[i].weather[0].icon,
+      date: forecast.list[i].dt_txt,
+      temperature: Math.round(forecast.list[i].main.temp),
+      wind: forecast.list[i].wind.speed,
+      humidity: forecast.list[i].main.humidity,
+    };
+
+    // adds forecast information on the end of list
+    fiveDayForecastStorage.push(fiveDayForecastDetail);
+  }
+  localStorage.setItem(
+    "fiveDayForecast",
+    JSON.stringify(fiveDayForecastStorage)
   );
+  loadFiveDayForecastCard();
+}
 
-  // creates paragraph element in card, adds class for card emoji, creates text for emoji
-  const cardEmoji = $("<h2>");
-  cardEmoji.addClass("card-emoji");
-  cardEmoji.text();
+function loadSearchHistoryButtons() {
+  $(".history-btns").empty();
+  if (searchHistoryStorage.length < 1) {
+    return;
+  } else {
+    for (let i = 0; i < searchHistoryStorage.length; i++) {
+      const historyBtn = $("<button>");
+      historyBtn.text(searchHistoryStorage[i].city);
+      historyBtn.attr("data-latitude", searchHistoryStorage[i].lat);
+      historyBtn.attr("data-longitude", searchHistoryStorage[i].lon);
+      historyBtn.addClass("btn search-history");
+      $(".history-btns").append(historyBtn);
+    }
+  }
+  $(".search-history").on("click", handleSearchHistoryCitySearch);
+}
 
-  // creates paragraph element in card, adds class for card wind, creates text for wind
-  const cardWind = $("<p>");
-  cardWind.addClass("card-wind");
-  cardWind.text("Wind Speed: " + currectForecastDetails.wind + " mph");
+function loadCurrentForecastCard() {
+  if (currentForecastStorage === "") {
+    return;
+  } else {
+    $(".forecast-card").empty();
 
-  // creates paragraph element in card, adds class for card humidity, creates text for humidity
-  const cardHumidity = $("<p>");
-  cardHumidity.addClass("card-humidity");
-  cardHumidity.text("Humidity: " + currectForecastDetails.humidity + "%");
+    //creates box around forecast card
+    const cardBody = $("<div>");
+    cardBody.css("border", "3px solid black");
+    cardBody.css("border-width", "5px");
+    cardBody.css("marginTop", "10px");
+    cardBody.css("padding", "30px");
 
-  // appends card title, card text, card deadline, card delete button, and card body
-  cardBody.append(cardCity);
-  cardBody.append(cardDate);
-  cardBody.append(cardEmoji);
-  cardBody.append(cardTemperature);
-  cardBody.append(cardWind);
-  cardBody.append(cardHumidity);
-  $(".forecast-card").append(cardBody);
+    // creates paragraph element in card, adds class for card city, creates text for city
+    const cardCity = $("<h3>");
+    cardCity.addClass("card-city");
+    cardCity.text(currentForecastStorage.city);
+
+    // creates paragraph element in card, adds class for card date, creates text for date
+    const cardDate = $("<h5>");
+    cardDate.addClass("card-date");
+    let date = currentForecastStorage.date.split(" ");
+    cardDate.text(dayjs(date[0]).format("MM/DD/YYYY"));
+
+    // creates paragraph element in card, adds class for card temperature, creates text for temperature
+    const cardTemperature = $("<p>");
+    cardTemperature.addClass("card-temperature");
+    cardTemperature.text(
+      "Temperature: " + currentForecastStorage.temperature + "\u00B0"
+    );
+
+    // creates paragraph element in card, adds class for card emoji, creates text for emoji
+    const cardImage = $("<img>");
+    cardImage.addClass("card-image");
+    cardImage.attr(
+      "src",
+      "https://openweathermap.org/img/wn/" +
+        currentForecastStorage.icon +
+        "@2x.png"
+    );
+
+    // creates paragraph element in card, adds class for card wind, creates text for wind
+    const cardWind = $("<p>");
+    cardWind.addClass("card-wind");
+    cardWind.text("Wind Speed: " + currentForecastStorage.wind + " mph");
+
+    // creates paragraph element in card, adds class for card humidity, creates text for humidity
+    const cardHumidity = $("<p>");
+    cardHumidity.addClass("card-humidity");
+    cardHumidity.text("Humidity: " + currentForecastStorage.humidity + "%");
+
+    // appends card title, card text, card deadline, card delete button, and card body
+    cardBody.append(cardCity);
+    cardBody.append(cardDate);
+    cardBody.append(cardImage);
+    cardBody.append(cardTemperature);
+    cardBody.append(cardWind);
+    cardBody.append(cardHumidity);
+    $(".forecast-card").append(cardBody);
+  }
 }
 
 // TODO function to create current forecast card
-function loadFiveDayForecastCard(fiveDayForecastDetail) {
-  const cardBody = $("<div>");
-  //creates box around forecast card
-  cardBody.css("border", "3px solid black");
-  cardBody.css("background-color", "navy");
-  cardBody.css("color", "white");
+function loadFiveDayForecastCard() {
+  $(".five-day").empty();
 
-  cardBody.css("border-width", "5px");
-  cardBody.css("marginTop", "10px");
-  cardBody.css("padding", "30px");
+  for (let i = 0; i < fiveDayForecastStorage.length; i++) {
+    const cardBody = $("<div>");
+    //creates box around forecast card
+    cardBody.css("border", "3px solid black");
+    cardBody.css("background-color", "navy");
+    cardBody.css("color", "white");
 
-  // creates paragraph element in card, adds class for card date, creates text for date
-  const cardDate = $("<h5>");
-  cardDate.addClass("card-date");
-  let date = fiveDayForecastDetail.date.split(" ");
-  cardDate.text(dayjs(date[0]).format("MM/DD/YYYY"));
+    cardBody.css("border-width", "5px");
+    cardBody.css("marginTop", "10px");
+    cardBody.css("padding", "30px");
 
-  // creates paragraph element in card, adds class for card emoji, creates text for emoji
-  const cardEmoji = $("<h2>");
-  cardEmoji.addClass("card-emoji");
-  cardEmoji.text(fiveDayForecastDetail.icon);
+    // creates paragraph element in card, adds class for card date, creates text for date
+    const cardDate = $("<h5>");
+    cardDate.addClass("card-date");
+    let date = fiveDayForecastStorage[i].date.split(" ");
+    cardDate.text(dayjs(date[0]).format("MM/DD/YYYY"));
 
-  // creates paragraph element in card, adds class for card temperature, creates text for temperature
-  const cardTemperature = $("<p>");
-  cardTemperature.addClass("card-temperature");
-  cardTemperature.text(
-    "Temperature: " + fiveDayForecastDetail.temperature + "\u00B0"
-  );
+    // creates paragraph element in card, adds class for card emoji, creates text for emoji
+    const cardImage = $("<img>");
+    cardImage.addClass("card-image");
+    cardImage.attr(
+      "src",
+      "https://openweathermap.org/img/wn/" +
+        fiveDayForecastStorage[i].icon +
+        "@2x.png"
+    );
 
-  // creates paragraph element in card, adds class for card wind, creates text for wind
-  const cardWind = $("<p>");
-  cardWind.addClass("card-wind");
-  cardWind.text("Wind Speed: " + fiveDayForecastDetail.wind + " mph");
+    // creates paragraph element in card, adds class for card temperature, creates text for temperature
+    const cardTemperature = $("<p>");
+    cardTemperature.addClass("card-temperature");
+    cardTemperature.text(
+      "Temperature: " + fiveDayForecastStorage[i].temperature + "\u00B0"
+    );
 
-  // creates paragraph element in card, adds class for card humidity, creates text for humidity
-  const cardHumidity = $("<p>");
-  cardHumidity.addClass("card-humidity");
-  cardHumidity.text("Humidity: " + fiveDayForecastDetail.humidity + "%");
+    // creates paragraph element in card, adds class for card wind, creates text for wind
+    const cardWind = $("<p>");
+    cardWind.addClass("card-wind");
+    cardWind.text("Wind Speed: " + fiveDayForecastStorage[i].wind + " mph");
 
-  // appends card title, card text, card deadline, card delete button, and card body
-  cardBody.append(cardDate);
-  cardBody.append(cardEmoji);
-  cardBody.append(cardTemperature);
-  cardBody.append(cardWind);
-  cardBody.append(cardHumidity);
-  $(".five-day").append(cardBody);
-}
+    // creates paragraph element in card, adds class for card humidity, creates text for humidity
+    const cardHumidity = $("<p>");
+    cardHumidity.addClass("card-humidity");
+    cardHumidity.text("Humidity: " + fiveDayForecastStorage[i].humidity + "%");
 
-function weatherEmoji(weatherIcon) {
-  let emojiString = "";
-  switch (weatherIcon) {
-    case "01d":
-      emojiString = "☀️";
-      break;
-    case "02d":
-      emojiString = "⛅";
-      break;
-    case "03d":
-      emojiString = "☁️";
-      break;
-    case "04d":
-      emojiString = "🌤️";
-      break;
-    case "09d":
-      emojiString = "☔";
-      break;
-    case "10d":
-      emojiString = "🌧️";
-      break;
-    case "11d":
-      emojiString = "⛈️";
-      break;
-    case "13d":
-      emojiString = "❄️";
-      break;
-    case "50d":
-      emojiString = "🌫️";
-      break;
-    default:
-      emojiString = "🌘";
+    // appends card title, card text, card deadline, card delete button, and card body
+    cardBody.append(cardDate);
+    cardBody.append(cardImage);
+    cardBody.append(cardTemperature);
+    cardBody.append(cardWind);
+    cardBody.append(cardHumidity);
+    $(".five-day").append(cardBody);
   }
-  return emojiString;
 }
-
-// TODO function to create five day forecast cards
-
-// TODO function to create Search History button
-
-// TODO function to write things to local storage
-
-// TODO function to render things from localStorage
 
 $(document).ready(function () {
+  loadCurrentForecastCard();
+  loadFiveDayForecastCard();
+  loadSearchHistoryButtons();
   $("#cityInput").on("submit", handleCitySearch);
+  $(".search-history").on("click", handleSearchHistoryCitySearch);
 });

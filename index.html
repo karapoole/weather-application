@@ -38,7 +38,7 @@
 
   <body>
     <h1>Weather Forecast</h1>
-    <!-- input -->
+    <!-- input box -->
     <form class="row g-3" id="cityInput">
       <div class="col-auto">
         <label for="inputCity" class="visually-hidden">City</label>
@@ -53,19 +53,16 @@
         <button type="submit" class="btn btn-primary mb-3">Search</button>
       </div>
     </form>
-    <!-- end input -->
+    <!-- end input box -->
+    <h4>Search History:</h4>
     <div class="history-btns"></div>
-    <!--Forecast Card-->
-    <h2>Current Forecast:</h2>
+
+    <!--current forecast Card-->
+    <h2 class="current">Current Forecast:</h2>
     <div class="forecast-card"></div>
     <h2>5-Day Forecast:</h2>
-    <div class="five-day">
-      <!-- <div class="day-1"></div>
-      <div class="day-2"></div>
-      <div class="day-3"></div>
-      <div class="day-4"></div>
-      <div class="day-5"></div> -->
-    </div>
+    <div class="five-day"></div>
+
     <!-- boostrap library -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
