@@ -1,4 +1,4 @@
-// Setting up local storage
+// Sets up local storage for current forecast, five day forecast, and search history
 let currentForecastStorage =
   JSON.parse(localStorage.getItem("currentForecast")) || "";
 let fiveDayForecastStorage =
@@ -6,7 +6,7 @@ let fiveDayForecastStorage =
 let searchHistoryStorage =
   JSON.parse(localStorage.getItem("searchHistory")) || [];
 
-//function to get an return latitue and longitue of city
+//Returns latitue and longitue of city
 async function handleCoordinates(city) {
   let latlon = [];
   const apiKey = "59d674a8299ce106ece15287cf479fbc";
@@ -35,7 +35,7 @@ async function handleCoordinates(city) {
   return latlon;
 }
 
-//fuction to get and return 5 day forecast for city using latitude and longitude from above
+//fuction returns 5 day forecast for city using latitude and longitude from above
 async function handleForecast(lat, lon) {
   const apiKey = "59d674a8299ce106ece15287cf479fbc";
 
@@ -65,42 +65,56 @@ async function handleForecast(lat, lon) {
   return foreCast;
 }
 
+//function runs forecast call when user inputs city in search box
 async function handleCitySearch(event) {
   event.preventDefault();
 
+  //retrieves user input from search box
   const city = $("#inputCity").val();
 
+  //call to get coordinates
   let coordinates = await handleCoordinates(city);
   const latitude = coordinates[0];
   const longitude = coordinates[1];
   //passes latitdue and longitude to get forecast data
   let forecast = await handleForecast(latitude, longitude);
+  //create current and fiveday forecast cards
   handleForecardCards(forecast);
 
+  //creates the information for search history button
   const searchHistoryBtn = {
     city: forecast.city.name,
     lat: latitude,
     lon: longitude,
   };
 
+  //adds search history information to local storage
   searchHistoryStorage.push(searchHistoryBtn);
   localStorage.setItem("searchHistory", JSON.stringify(searchHistoryStorage));
+  //loads search histroy buttons from local storage
   loadSearchHistoryButtons();
+  //empties search box
   $("#inputCity").val("");
 }
 
+//handles forecast search when user clicks a search history button
 async function handleSearchHistoryCitySearch(event) {
   event.preventDefault();
 
+  //gets latitude and longitude from clicked search history button
   const searchHistoryBtn = $(event.currentTarget);
   const latitude = searchHistoryBtn.data("latitude");
   const longitude = searchHistoryBtn.data("longitude");
 
+  //forecast call with latitude and longitude from search history button
   let forecast = await handleForecast(latitude, longitude);
+  //loads current and 5 day forecast cards
   handleForecardCards(forecast);
 }
 
+//creates current and five day forecast cards
 function handleForecardCards(forecast) {
+  //creates object using current forecast data
   const currentForecastDetails = {
     city: forecast.city.name,
     icon: forecast.list[0].weather[0].icon,
@@ -111,17 +125,18 @@ function handleForecardCards(forecast) {
   };
 
   currentForecastStorage = currentForecastDetails;
-  // Set current forecast information into local storage
+  // puts current data into local stoarge
   localStorage.setItem(
     "currentForecast",
     JSON.stringify(currentForecastStorage)
   );
 
+  //creates current forecast card
   loadCurrentForecastCard();
 
-  // Loading five day forecast information to localStorage
   fiveDayForecastStorage = [];
 
+  //gets five day forecast from forecast response
   for (let i = 7; i < forecast.list.length; i += 8) {
     const fiveDayForecastDetail = {
       icon: forecast.list[i].weather[0].icon,
@@ -134,15 +149,20 @@ function handleForecardCards(forecast) {
     // adds forecast information on the end of list
     fiveDayForecastStorage.push(fiveDayForecastDetail);
   }
+  //adds five day forecast list to local storage
   localStorage.setItem(
     "fiveDayForecast",
     JSON.stringify(fiveDayForecastStorage)
   );
+  // creates five day forecast cards from local storage
   loadFiveDayForecastCard();
 }
 
+//function renders search history buttons from local storage
 function loadSearchHistoryButtons() {
+  //empties search history buttons
   $(".history-btns").empty();
+  //if there is one or more search history buttons, then renders from local storage
   if (searchHistoryStorage.length < 1) {
     return;
   } else {
@@ -155,10 +175,13 @@ function loadSearchHistoryButtons() {
       $(".history-btns").append(historyBtn);
     }
   }
+  //adds event listener to search history buttons
   $(".search-history").on("click", handleSearchHistoryCitySearch);
 }
 
+//function creates current forecast card from local storage
 function loadCurrentForecastCard() {
+  //if there is something in local storage, will render
   if (currentForecastStorage === "") {
     return;
   } else {
@@ -220,7 +243,7 @@ function loadCurrentForecastCard() {
   }
 }
 
-// TODO function to create current forecast card
+//function that creates the five day forecast cards
 function loadFiveDayForecastCard() {
   $(".five-day").empty();
 
@@ -278,6 +301,7 @@ function loadFiveDayForecastCard() {
   }
 }
 
+//functions run when page loads
 $(document).ready(function () {
   loadCurrentForecastCard();
   loadFiveDayForecastCard();
