@@ -1,0 +1,21 @@
+body {
+  margin: 2rem;
+}
+
+.current {
+  margin-top: 1rem;
+}
+
+.five-day {
+  display: flex;
+}
+
+.search-history {
+  background-color: aliceblue;
+  border: solid black;
+}
+
+.forecast-card {
+  display: flex;
+  margin-bottom: 2rem;
+}
