@@ -12,7 +12,7 @@ async function handleCoordinates(city) {
   const apiKey = "59d674a8299ce106ece15287cf479fbc";
   //URL needed for API request
   const coordinateUrl =
-    "http://api.openweathermap.org/geo/1.0/direct?q=" +
+    "https://api.openweathermap.org/geo/1.0/direct?q=" +
     city +
     "&appid=" +
     apiKey;
@@ -40,7 +40,7 @@ async function handleForecast(lat, lon) {
   const apiKey = "59d674a8299ce106ece15287cf479fbc";
 
   let forcastUrl =
-    "http://api.openweathermap.org/data/2.5/forecast?lat=" +
+    "https://api.openweathermap.org/data/2.5/forecast?lat=" +
     lat +
     "&lon=" +
     lon +
